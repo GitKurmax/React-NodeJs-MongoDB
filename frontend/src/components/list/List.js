@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import "./List.scss";
-import { Icon, Label, Menu, Table } from 'semantic-ui-react'
+import { Icon, Label, Table } from 'semantic-ui-react';
 
 export default class List extends Component {
     constructor(props) {
@@ -10,7 +10,8 @@ export default class List extends Component {
     }
 
     componentDidMount() {
-        fetch("http://localhost:3000/api/getAll")
+        fetch("http://localhost:3100/api/getAll")
+            .catch(err => console.log(err))
             .then(response => response.json())
             .then(data => {
                 const dataToRender = data.map((user, index) => {
@@ -31,55 +32,34 @@ export default class List extends Component {
 
     render() {
         const list = this.state.data.map(user => 
-            <div key={user.id}>
-                <span>{user.position}</span>
-                <span>{user.name}</span>
-                <span>{user.age}</span>
-            </div>
-            )
+            <Table.Row key={user.id + user.position}>
+                <Table.Cell className="cell-position">{user.position}</Table.Cell>
+                <Table.Cell>{user.name}</Table.Cell>
+                <Table.Cell>{user.age}</Table.Cell>
+                <Table.Cell className="cell-edit">
+                    <Icon link name='edit' />
+                    <Icon link name='trash alternate' />
+                </Table.Cell>
+            </Table.Row>
+        )
 
         return (
             <div className="list-container">
-                <table class="ui celled table">
-                <thead class="">
-                    <tr class="">
-                    <th class="">No</th>
-                    <th class="">Name</th>
-                    <th class="">Age</th>
-                    </tr>
-                </thead>
-                <tbody class="">
-                    <tr class="">
-                    <td class=""><div class="ui ribbon label">First</div></td>
-                    <td class="">Cell</td>
-                    <td class="">Cell</td>
-                    </tr>
-                    <tr class="">
-                    <td class="">Cell</td>
-                    <td class="">Cell</td>
-                    <td class="">Cell</td>
-                    </tr>
-                    <tr class="">
-                    <td class="">Cell</td>
-                    <td class="">Cell</td>
-                    <td class="">Cell</td>
-                    </tr>
-                </tbody>
-                <tfoot class="">
-                    <tr class="">
-                    <th colspan="3" class="">
-                        <div class="ui pagination right floated menu">
-                        <a class="icon item"><i aria-hidden="true" class="chevron left icon"></i></a>
-                        <a class="item">1</a>
-                        <a class="item">2</a>
-                        <a class="item">3</a>
-                        <a class="item">4</a>
-                        <a class="icon item"><i aria-hidden="true" class="chevron right icon"></i></a>
-                        </div>
-                    </th>
-                    </tr>
-                </tfoot>
-                </table>
+                <Table celled>
+                <Table.Header>
+                    <Table.Row>
+                        <Table.HeaderCell>
+                            <Label ribbon>No</Label>
+                        </Table.HeaderCell>
+                        <Table.HeaderCell>Name</Table.HeaderCell>
+                        <Table.HeaderCell>Age</Table.HeaderCell>
+                        <Table.HeaderCell>Edit</Table.HeaderCell>
+                    </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                    {list}
+                </Table.Body>
+                </Table>
             </div>
         )
     }
