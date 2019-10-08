@@ -1,87 +1,115 @@
 import React, { Component } from 'react';
 import "./List.scss";
 import { Icon, Label, Table } from 'semantic-ui-react';
-import ModalWindow from '../modal/ModalWindow'
+import ModalWindow from '../modal/ModalWindow';
 
 export default class List extends Component {
     constructor(props) {
         super(props);
         this.state = {
             data: [],
-            showModal: false,
-            id: null
+            showModalDelete: false,
+            showModalEdit: false,
+            id: null,
+            editName: '',
+            editAge: ''
         };
 
         this.showModal = this.showModal.bind(this);
+        this.closeModal = this.closeModal.bind(this);
+        this.deleteUser = this.deleteUser.bind(this);
+        this.editUser = this.editUser.bind(this);
     }
 
-    componentDidMount() {
-      fetch("http://localhost:3100/api/getAll")
-        .catch(err => console.log(err))
-        .then(response => response.json())
-        .then(data => {
-          const dataToRender = data.map((user, index) => {
-            return {
-              id: user._id,
-              name: user.name,
-              age: user.age,
-              position: ++index
-            } 
-          });
+    showModal(action, id, editName, editAge) {
+        if (action === 'delete') {
+            this.setState({
+                showModalDelete: true,
+                id: id
+            })
+        }
 
-          this.setState({
-              data: dataToRender
-          })
-        console.log(this.state.data)
-      });
+        if (action === 'edit') {
+            this.setState({
+                showModalEdit: true,
+                id: id,
+                editName: editName,
+                editAge: editAge
+            })
+        }
     }
 
-    showModal(id) {
+    closeModal() {
         this.setState(state => {
             return {
-                showModal: state.showModal ? false : true,
-                id: id
+                showModalDelete: false,
+                showModalEdit: false
             }
         });
-        console.log(id)
     }
 
     deleteUser() {
-      console.log('id: ' + this.state.id)
-      // fetch("http://localhost:3100/api/getAll", {  
-      //   method: 'post',  
-      //   headers: {  
-      //     "Content-type": 'application/json'  
-      //   },  
-      //   body: {
-      //     id: this.state.id
-      //   }  
-      // })
-      // .catch(err => console.log(err))
-      // .then(() => console.log('deleted'))
+        this.props.showLoader(); 
+      fetch("http://localhost:3100/api/removeUser", {  
+        method: 'POST',  
+        headers: {  
+          "Content-type": 'application/json'  
+        },  
+        body: JSON.stringify({id: this.state.id})
+      })
+      .catch(err => console.log('Error in deleteUser' + err))
+      .then(() => {
+            this.props.toggleUpdateData();
+        })
     }
 
+    editUser(name, age) {
+        this.props.showLoader(); 
+        fetch("http://localhost:3100/api/editUser", {  
+          method: 'PUT',  
+          headers: {  
+            "Content-type": 'application/json'  
+          },  
+          body: JSON.stringify({id: this.state.id, name: name, age: age})
+        })
+        .catch(err => console.log('Error in editUser' + err))
+        .then(() => {
+            this.props.toggleUpdateData();
+          })
+      }
+
     render() {
-        const list = this.state.data.map(user => 
+        const list = this.props.data.map(user => 
             <Table.Row key={user.id + user.position}>
                 <Table.Cell className="cell-position">{user.position}</Table.Cell>
                 <Table.Cell>{user.name}</Table.Cell>
                 <Table.Cell>{user.age}</Table.Cell>
                 <Table.Cell className="cell-edit">
-                    <Icon link name='edit' click="" />
-                    <Icon link name='trash alternate' onClick={() => this.showModal()}/>
+                    <Icon link name='edit' onClick={() => this.showModal('edit', user.id, user.name, user.age)}/>
+                    <Icon link name='trash alternate' onClick={() => this.showModal('delete', user.id)}/>
                 </Table.Cell>
             </Table.Row>
         )
 
         return (
             <React.Fragment>
-                {this.state.showModal && 
+                {this.state.showModalDelete && 
                   <ModalWindow 
-                    open={this.state.showModal}
-                    closeModal={this.showModal}
+                    open={this.state.showModalDelete}
+                    closeModal={this.closeModal}
                     deleteUser={this.deleteUser}
+                    showDelete={this.showModal}
                 />}
+                {this.state.showModalEdit && 
+                  <ModalWindow 
+                    open={this.state.showModalEdit}
+                    closeModal={this.closeModal}
+                    editUser={this.editUser}
+                    showEdit={this.showModal}
+                    name={this.state.editName}
+                    age={this.state.editAge}
+                />}
+
                 <div className="list-container">
                     <Table celled>
                     <Table.Header>

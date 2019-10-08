@@ -1,6 +1,8 @@
 .list-container {
     width: 100%;
+    height: calc(100vh - 110px);
     padding: 30px;
+    overflow-Y: scroll;
 }
 
 .cell-position {

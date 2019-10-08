@@ -27,6 +27,7 @@ app.get('/api/getAll', function (req, res) {
 
 
 app.post('/api/add', function (req, res) {
+    console.log(req.body)
     const person = new Person ({
         name: req.body.name,
         age: req.body.age
@@ -43,7 +44,7 @@ app.post('/api/removeUser', function (req, res) {
     Person.findOneAndRemove({_id: req.body.id}, (err, todo) => {
     console.log(todo);
     if (err) return res.status(500).send(err);
-return res.status(200).send({'message':'User successfully deleted'});
+    return res.status(200).send({'message':'User successfully deleted'});
     });
 });
 
